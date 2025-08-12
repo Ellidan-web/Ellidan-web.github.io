@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📈 i-GOV Performance Trends</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .hamburger {
+      font-size: 30px;
+      cursor: pointer;
+      user-select: none;
+      padding: 10px;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0; 
+      left: -250px;
+      width: 250px;
+      height: 100%;
+      background: #ffffff;
+      color: white;
+      overflow-y: auto;
+      transition: left 0.3s ease;
+      padding-top: 60px;
+      z-index: 1000;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    }
+
+    .sidebar.active {
+      left: 0;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .sidebar ul li a {
+      color: #333;
+      text-decoration: none;
+      display: block;
+    }
+
+    .sidebar ul li a:hover {
+      background: #f0f0f0;
+    }
+   
+    :root {
+      --primary-color: #005A9C;
+      --secondary-color: #00A3E0;
+      --background-color: #f4f7f9;
+      --card-background: #ffffff;
+      --text-color: #333333;
+      --label-color: #004070;
+      --border-color: #dbe2e8;
+      --font-family: 'Montserrat', sans-serif;
+      --border-radius: 12px;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+      padding-top: 60px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--primary-color);
+      font-size: 2.5rem;
+      position: relative;
+    }
+
+    h1::after {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 4px;
+      background: var(--secondary-color);
+      margin: 0.5rem auto 0;
+      border-radius: 2px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      align-items: center;
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+    }
+    
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--label-color);
+      min-width: 100px;
+    }
+
+    .controls select {
+      padding: 0.8rem 1rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #fdfdfd;
+      margin-top: 0.5rem;
+      width: 500px;
+    }
+
+    .controls input[type="date"] {
+      padding: 0.8rem 1rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #fdfdfd;
+      margin-top: 0.5rem;
+    }
+
+    .controls button {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 8px;
+      min-width: 120px;
+      transition: all 0.3s ease;
+    }
+
+    #applyFilter {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    #applyFilter:hover {
+      background-color: #004080;
+    }
+
+    #resetFilter {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    #resetFilter:hover {
+      background-color: #f0f0f0;
+    }
+
+    .chart-container {
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 1.5rem;
+      margin: 0 auto 2rem;
+      max-width: 1400px;
+      height: 500px;
+      position: relative;
+    }
+
+    .loading-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      color: var(--primary-color);
+    }
+
+    .no-data-message {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      text-align: center;
+      width: 80%;
+    }
+
+    .legend-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      margin-right: 1rem;
+    }
+
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 8px;
+      border-radius: 4px;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .controls label {
+        min-width: auto;
+      }
+      
+      .controls select, .controls input[type="date"] {
+        width: 100%;
+      }
+      
+      .controls button {
+        width: 100%;
+      }
+      
+      .chart-container {
+        height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Hamburger Menu -->
+<div class="hamburger" onclick="toggleMenu()">☰</div>
+
+<!-- Sidebar placeholder for later -->
+<div class="sidebar" id="sidebarMenu">
+ <ul>
+  <li><a href="index.html" onclick="toggleMenu()">📊 Dashboard</a></li>
+  <li><a href="page1.html" onclick="toggleMenu()">📁 Reports</a></li>
+  <li>
+    <a href="https://docs.google.com/spreadsheets/d/1zYSKIqZNEkZXqvXTZJ90WlABxheArCkniGGACAPAGUg/edit?gid=0#gid=0" 
+       target="_blank" 
+       onclick="toggleMenu()">
+      📬 Spreadsheet
+    </a>
+  </li>
+</ul>
+
+<h1>📈 i-GOV Performance Trends</h1>
+
+<div class="controls">
+  <label>Filter by Office:
+    <select id="officeSelect">
+      <option value="All" selected>-- All Offices --</option>
+      <option value="BICOL CENTRAL STATION">BICOL CENTRAL STATION</option>
+      <option value="BICOL SCIENCE AND TECHNOLOGY CENTRUM">BICOL SCIENCE AND TECHNOLOGY CENTRUM</option>
+      <option value="CITY ACCOUNTING OFFICE">CITY ACCOUNTING OFFICE</option>
+      <option value="CITY AGRICULTURIST OFFICE">CITY AGRICULTURIST OFFICE</option>
+      <option value="CITY ASSESSORS OFFICE">CITY ASSESSORS OFFICE</option>
+      <option value="CITY BUDGET OFFICE">CITY BUDGET OFFICE</option>
+      <option value="CITY CIVIL REGISTRY OFFICE">CITY CIVIL REGISTRY OFFICE</option>
+      <option value="CITY DISASTER RISK REDUCTION MANAGEMENT OFFICE">CITY DISASTER RISK REDUCTION MANAGEMENT OFFICE</option>
+      <option value="CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE">CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE</option>
+      <option value="CITY ENGINEERS OFFICE">CITY ENGINEERS OFFICE</option>
+      <option value="CITY EVENTS PROTOCOL AND PUBLICATION INFORMATION OFFICE">CITY EVENTS PROTOCOL AND PUBLICATION INFORMATION OFFICE</option>
+      <option value="CITY HEALTH OFFICE">CITY HEALTH OFFICE</option>
+      <option value="CITY HUMAN RESOURCE MANAGEMENT OFFICE">CITY HUMAN RESOURCE MANAGEMENT OFFICE</option>
+      <option value="CITY LEGAL OFFICE">CITY LEGAL OFFICE</option>
+      <option value="CITY MAYORS OFFICE">CITY MAYORS OFFICE</option>
+      <option value="CITY MAYORS OFFICE - OFFICE OF THE SENIOR CITIZENS AFFAIRS">CITY MAYORS OFFICE - OFFICE OF THE SENIOR CITIZENS AFFAIRS</option>
+      <option value="CITY MAYORS OFFICE – RESOURCE CENTER FOR THE BLINDS">CITY MAYORS OFFICE – RESOURCE CENTER FOR THE BLINDS</option>
+      <option value="CITY MAYORS OFFICE - WATER SERVICES DIVISION">CITY MAYORS OFFICE - WATER SERVICES DIVISION</option>
+      <option value="CITY PLANNING AND DEVELOPMENT OFFICE">CITY PLANNING AND DEVELOPMENT OFFICE</option>
+      <option value="CITY POPULATION AND NUTRITION OFFICE">CITY POPULATION AND NUTRITION OFFICE</option>
+      <option value="CITY SOCIAL WELFARE AND DEVELOPMENT OFFICE">CITY SOCIAL WELFARE AND DEVELOPMENT OFFICE</option>
+      <option value="CITY TREASURERS OFFICE">CITY TREASURERS OFFICE</option>
+      <option value="CITY VETERINARY OFFICE">CITY VETERINARY OFFICE</option>
+      <option value="EDUCATION SCHOLARSHIP AND SPORTS OFFICE">EDUCATION SCHOLARSHIP AND SPORTS OFFICE</option>
+      <option value="GENERAL SERVICES OFFICE">GENERAL SERVICES OFFICE</option>
+      <option value="HOUSING AND SETTLEMENT OFFICE">HOUSING AND SETTLEMENT OFFICE</option>
+      <option value="INFORMATION TECHNOLOGY OFFICE">INFORMATION TECHNOLOGY OFFICE</option>
+      <option value="LINGKOD BARANGAY OFFICE">LINGKOD BARANGAY OFFICE</option>
+      <option value="MARKET ENTERPRISE PROMOTIONS OFFICE">MARKET ENTERPRISE PROMOTIONS OFFICE</option>
+      <option value="METRO PUBLIC EMPLOYMENT SERVICE OFFICE">METRO PUBLIC EMPLOYMENT SERVICE OFFICE </option>
+      <option value="NAGA CITY ABATTOIR">NAGA CITY ABATTOIR</option>
+      <option value="NAGA CITY HOSPITAL">NAGA CITY HOSPITAL</option>
+      <option value="NAGA CITY INVESTMENT BOARD">NAGA CITY INVESTMENT BOARD</option>
+      <option value="OFFICE OF THE CITY ADMINISTRATOR – ARTS, CULTURE, AND  TOURISM OFFICE">OFFICE OF THE CITY ADMINISTRATOR – ARTS, CULTURE, AND TOURISM OFFICE</option>
+      <option value="OFFICE OF THE CITY ADMINISTRATOR – BUILDING MAINTENANCE OFFICE ">OFFICE OF THE CITY ADMINISTRATOR</option>
+      <option value="OFFICE OF THE CITY ADMINISTRATOR - CITY PARKS AND RECREATIONAL FACILITIES MANAGEMENT OFFICE">OFFICE OF THE CITY ADMINISTRATOR - CITY PARKS AND RECREATIONAL FACILITIES MANAGEMENT OFFICE</option>
+      <option value="OFFICE OF THE CITY ADMINISTRATOR - I-GOVERNANCE OFFICE">OFFICE OF THE CITY ADMINISTRATOR - I-GOVERNANCE OFFICE</option>
+      <option value="OUR LADY OF LOURDES INFIRMARY">OUR LADY OF LOURDES INFIRMARY</option>
+      <option value="PERSONS WITH DISABILTY AFFAIRS OFFICE ">PERSONS WITH DISABILTY AFFAIRS OFFICE</option>
+      <option value="PUBLIC SAFETY OFFICE">PUBLIC SAFETY OFFICE</option>
+      <option value="RAUL S. ROCO LIBRARY / NAGA CITY PUBLIC LIBRARY">RAUL S. ROCO LIBRARY / NAGA CITY PUBLIC LIBRARY</option>
+      <option value="SANGGUNIANG PANLUNGSOD">SANGGUNIANG PANLUNGSOD</option>
+      <option value="SOLID WASTE MANAGEMENT OFFICE">SOLID WASTE MANAGEMENT OFFICE</option>
+    </select>
+  </label>
+  <label>Date Range:
+    <input type="date" id="startDate">
+  </label>
+  <label>To:
+    <input type="date" id="endDate">
+  </label>
+  <button id="applyFilter">Apply Filters</button>
+  <button id="resetFilter">Reset Filters</button>
+</div>
+
+<div class="chart-container">
+  <div class="loading-message" id="loadingMessage">Loading data...</div>
+  <div class="no-data-message" id="noDataMessage" style="display: none;">No performance data available for the selected filters</div>
+  <canvas id="performanceChart"></canvas>
+  <div class="legend-container" id="chartLegend"></div>
+</div>
+
+<script>
+  const endpoint = "https://script.google.com/macros/s/AKfycbwfsDeWwibuh9Zb6ylf72IaBIvNSTeCTm7TSfBRCVk2ftO4gOpbkCbW8RKg3xT19lnZ/exec";
+  let dataRaw = [];
+  let performanceChart = null;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Set default dates (last 3 months)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(endDate.getMonth() - 3);
+    
+    document.getElementById('startDate').valueAsDate = startDate;
+    document.getElementById('endDate').valueAsDate = endDate;
+    
+    document.getElementById('applyFilter').addEventListener('click', renderChart);
+    document.getElementById('resetFilter').addEventListener('click', resetFilters);
+    loadData();
+  });
+
+  function toggleMenu() {
+    const sidebar = document.getElementById('sidebarMenu');
+    sidebar.classList.toggle('active');
+  }
+
+  function resetFilters() {
+    document.getElementById('officeSelect').value = 'All';
+    
+    // Reset to default dates (last 3 months)
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setMonth(endDate.getMonth() - 3);
+    
+    document.getElementById('startDate').valueAsDate = startDate;
+    document.getElementById('endDate').valueAsDate = endDate;
+    
+    renderChart();
+  }
+
+  async function loadData() {
+    try {
+      document.getElementById('loadingMessage').style.display = 'block';
+      document.getElementById('noDataMessage').style.display = 'none';
+      
+      const resp = await fetch(endpoint);
+      if (!resp.ok) throw new Error('Network response was not ok');
+      
+      dataRaw = await resp.json();
+      
+      // If no data returned, use sample data
+      if (!dataRaw || dataRaw.length === 0) {
+        dataRaw = sampleData;
+      }
+      
+      renderChart();
+    } catch (error) {
+      console.error('Error loading data:', error);
+      // Use sample data if the endpoint fails
+      dataRaw = sampleData;
+      renderChart();
+    } finally {
+      document.getElementById('loadingMessage').style.display = 'none';
+    }
+  }
+
+  function getSelectedOffice() {
+    return document.getElementById('officeSelect').value;
+  }
+
+  function filterData(data) {
+    const office = getSelectedOffice();
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    
+    return data.filter(r => {
+      // Filter by office if not "All"
+      if (office !== 'All' && r['OFFICE:'] !== office) return false;
+      
+      // Filter by date
+      const recordDate = new Date(r['DATE:']);
+      if (startDate && recordDate < new Date(startDate)) return false;
+      if (endDate && recordDate > new Date(endDate)) return false;
+      
+      return true;
+    });
+  }
+
+  function calculateSqdAverage(record) {
+    const sqdKeys = ['SQD0', 'SQD1', 'SQD2', 'SQD3', 'SQD4', 'SQD5', 'SQD6', 'SQD7', 'SQD8'];
+    let sum = 0;
+    let count = 0;
+    
+    sqdKeys.forEach(key => {
+      const value = record[key];
+      if (value && !['Not Applicable', 'N/A'].includes(value)) {
+        const numValue = convertResponseToNumber(value);
+        if (!isNaN(numValue)) {
+          sum += numValue;
+          count++;
+        }
+      }
+    });
+    
+    return count > 0 ? sum / count : null;
+  }
+
+  function convertResponseToNumber(response) {
+    const scale = {
+      'Strongly Disagree': 1,
+      'Disagree': 2,
+      'Neutral': 3,
+      'Agree': 4,
+      'Strongly Agree': 5
+    };
+    return scale[response] || null;
+  }
+
+  function groupDataByOfficeAndDate(data) {
+    const officeData = {};
+    const allDates = new Set();
+    
+    // Process each record
+    data.forEach(record => {
+      const office = record['OFFICE:'] || 'Unknown';
+      const date = new Date(record['DATE:']).toISOString().split('T')[0];
+      const avgScore = calculateSqdAverage(record);
+      
+      if (avgScore === null) return;
+      
+      allDates.add(date);
+      
+      if (!officeData[office]) {
+        officeData[office] = {};
+      }
+      
+      if (!officeData[office][date]) {
+        officeData[office][date] = { sum: 0, count: 0 };
+      }
+      
+      officeData[office][date].sum += avgScore;
+      officeData[office][date].count++;
+    });
+    
+    // Calculate averages for each office and date
+    const sortedDates = Array.from(allDates).sort();
+    const result = {};
+    
+    for (const office in officeData) {
+      result[office] = {
+        averages: sortedDates.map(date => {
+          const dataPoint = officeData[office][date];
+          return dataPoint ? dataPoint.sum / dataPoint.count : null;
+        }),
+        color: getOfficeColor(office)
+      };
+    }
+    
+    return {
+      dates: sortedDates,
+      offices: result
+    };
+  }
+
+  function getOfficeColor(office) {
+    // Color scheme matching your dashboard
+    const colors = [
+      '#005A9C', '#00A3E0', '#70AD47', '#FFC000', 
+      '#7030A0', '#E46C0A', '#C00000', '#548235',
+      '#305496', '#7F7F7F', '#FF0000', '#00B0F0',
+      '#92D050', '#FFFF00', '#9900FF', '#FF6600'
+    ];
+    
+    // Hash the office name to get a consistent color index
+    let hash = 0;
+    for (let i = 0; i < office.length; i++) {
+      hash = office.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  }
+
+  function renderChart() {
+    const filteredData = filterData(dataRaw);
+    const selectedOffice = getSelectedOffice();
+    const { dates, offices } = groupDataByOfficeAndDate(filteredData);
+    
+    const ctx = document.getElementById('performanceChart').getContext('2d');
+    
+    // Clear previous chart if it exists
+    if (performanceChart) {
+      performanceChart.destroy();
+    }
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    
+    // Prepare datasets
+    let datasets = [];
+    let legendItems = [];
+    
+    if (selectedOffice === 'All') {
+      // Show all offices (limit to top 10 for readability)
+      const officeEntries = Object.entries(offices);
+      
+      // Sort by number of data points (descending)
+      officeEntries.sort((a, b) => {
+        const aCount = a[1].averages.filter(avg => avg !== null).length;
+        const bCount = b[1].averages.filter(avg => avg !== null).length;
+        return bCount - aCount;
+      });
+      
+      const topOffices = officeEntries.slice(0, 10); // Limit to top 10 offices
+      
+      topOffices.forEach(([office, data]) => {
+        // Only include offices with at least one data point
+        if (data.averages.some(avg => avg !== null)) {
+          datasets.push({
+            label: office,
+            data: data.averages,
+            borderColor: data.color,
+            backgroundColor: data.color + '80',
+            borderWidth: 2,
+            tension: 0.1,
+            fill: false,
+            pointRadius: 3,
+            pointHoverRadius: 5
+          });
+          
+          legendItems.push(`
+            <div class="legend-item">
+              <div class="legend-color" style="background-color: ${data.color}"></div>
+              <span>${office}</span>
+            </div>
+          `);
+        }
+      });
+    } else {
+      // Show selected office only if it has data
+      if (offices[selectedOffice] && offices[selectedOffice].averages.some(avg => avg !== null)) {
+        datasets.push({
+          label: selectedOffice,
+          data: offices[selectedOffice].averages,
+          borderColor: offices[selectedOffice].color,
+          backgroundColor: offices[selectedOffice].color + '80',
+          borderWidth: 3,
+          tension: 0.1,
+          fill: false,
+          pointRadius: 5,
+          pointHoverRadius: 7
+        });
+        
+        legendItems.push(`
+          <div class="legend-item">
+            <div class="legend-color" style="background-color: ${offices[selectedOffice].color}"></div>
+            <span>${selectedOffice}</span>
+          </div>
+        `);
+      }
+    }
+    
+    // Update visibility of no data message
+    if (datasets.length === 0) {
+      document.getElementById('noDataMessage').style.display = 'block';
+    } else {
+      document.getElementById('noDataMessage').style.display = 'none';
+    }
+    
+    // Only create chart if we have data to show
+    if (datasets.length > 0) {
+      performanceChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: dates,
+          datasets: datasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: selectedOffice === 'All' ? 'All Offices Performance' : `${selectedOffice} Performance`,
+              font: {
+                size: 18,
+                weight: 'bold'
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.dataset.label}: ${context.raw?.toFixed(2) || 'N/A'}`;
+                }
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              min: 1,
+              max: 5,
+              title: {
+                display: true,
+                text: 'Average Score (1-5 scale)'
+              },
+              ticks: {
+                stepSize: 0.5
+              }
+            },
+            x: {
+              title: {
+                display: true,
+                text: 'Date'
+              }
+            }
+          }
+        }
+      });
+    }
+    
+    // Update legend
+    const legendContainer = document.getElementById('chartLegend');
+    legendContainer.innerHTML = legendItems.join('');
+    
+    // Add scroll to legend if too many items
+    if (legendItems.length > 8) {
+      legendContainer.style.maxHeight = '200px';
+      legendContainer.style.overflowY = 'auto';
+    } else {
+      legendContainer.style.maxHeight = '';
+      legendContainer.style.overflowY = '';
+    }
+  }
+</script>
+</body>
+</html>

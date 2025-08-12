@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>📊 i-GOV Feedback Responses Breakdown</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+   
+   
+     body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .hamburger {
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: -250px; /* hidden by default */
+    width: 250px;
+    height: 100%;
+    background: #ffffff;
+    color: white;
+    overflow-y: auto;
+    transition: left 0.3s ease;
+    padding-top: 60px;
+    z-index: 1000;
+  }
+
+  .sidebar.active {
+    left: 0;
+  }
+
+  .sidebar ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .sidebar ul li {
+    padding: 15px 20px;
+    border-bottom: 1px solid #444;
+  }
+
+  .sidebar ul li a {
+    color: rgb(0, 0, 0);
+    text-decoration: none;
+    display: block;
+  }
+
+  .sidebar ul li a:hover {
+    background: #555;
+  }
+   
+   
+   
+   :root {
+      --primary-color: #005A9C;
+      --secondary-color: #00A3E0;
+      --background-color: #f4f7f9;
+      --card-background: #ffffff;
+      --text-color: #333333;
+      --label-color: #004070;
+      --border-color: #dbe2e8;
+      --success-color: #28a745;
+      --danger-color: #dc3545;
+      --font-family: 'Montserrat', sans-serif;
+      --border-radius: 12px;
+      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      --transition-speed: 0.3s;
+    }
+
+    body {
+      font-family: var(--font-family);
+      background-color: var(--background-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 2rem;
+      min-height: 100vh;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: var(--primary-color);
+      font-size: 2.5rem;
+      font-weight: 700;
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    h1::after {
+      content: '';
+      display: block;
+      width: 100px;
+      height: 4px;
+      background: var(--secondary-color);
+      margin: 0.5rem auto 0;
+      border-radius: 2px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+      align-items: center;
+      background: var(--card-background);
+      padding: 1.5rem;
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      transition: all var(--transition-speed) ease;
+    }
+
+    .controls:hover {
+      box-shadow: 0 8px 25px rgba(0, 90, 156, 0.1);
+    }
+
+    .controls label {
+      display: flex;
+      flex-direction: column;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--label-color);
+      min-width: 180px;
+    }
+
+    .controls select {
+      padding: 0.8rem 1rem;
+      font-family: var(--font-family);
+      font-size: 0.95rem;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      background-color: #fdfdfd;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+      transition: all var(--transition-speed) ease;
+      margin-top: 0.5rem;
+    }
+
+    .controls select:focus {
+      outline: none;
+      border-color: var(--secondary-color);
+      box-shadow: 0 0 0 3px rgba(0, 163, 224, 0.2);
+    }
+
+    .controls button {
+      padding: 0.8rem 1.5rem;
+      cursor: pointer;
+      font-family: var(--font-family);
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 8px;
+      transition: all var(--transition-speed) ease;
+      min-width: 120px;
+    }
+
+    #applyFilter {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    #applyFilter:hover {
+      background-color: #004a84;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 90, 156, 0.2);
+    }
+
+    #resetFilter {
+      background-color: white;
+      color: var(--primary-color);
+      border: 1px solid var(--border-color);
+    }
+
+    #resetFilter:hover {
+      background-color: #f0f7ff;
+      border-color: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+
+    .response-container {
+      background: var(--card-background);
+      border-radius: var(--border-radius);
+      box-shadow: var(--card-shadow);
+      padding: 2rem;
+      margin-bottom: 2rem;
+      transition: all var(--transition-speed) ease;
+    }
+
+    .response-container:hover {
+      box-shadow: 0 8px 25px rgba(0, 90, 156, 0.1);
+      transform: translateY(-3px);
+    }
+
+    .question-title {
+      color: var(--primary-color);
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid var(--secondary-color);
+      padding-bottom: 0.5rem;
+    }
+
+    .response-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+    }
+
+    .response-table th {
+      background-color: var(--primary-color);
+      color: white;
+      text-align: left;
+      padding: 0.8rem;
+      font-weight: 500;
+    }
+
+    .response-table td {
+      padding: 0.8rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .response-table tr:nth-child(even) {
+      background-color: rgba(0, 163, 224, 0.05);
+    }
+
+    .response-table tr:hover {
+      background-color: rgba(0, 163, 224, 0.1);
+    }
+
+    .total-responses {
+      font-weight: 600;
+      color: var(--primary-color);
+      margin-top: 1rem;
+      text-align: right;
+    }
+
+    .percentage-bar {
+      height: 8px;
+      background-color: #e0e0e0;
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    .percentage-fill {
+      height: 100%;
+      border-radius: 4px;
+      background-color: var(--secondary-color);
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.8rem;
+      }
+      
+      .controls label {
+        min-width: auto;
+      }
+      
+      .controls button {
+        width: 100%;
+      }
+      
+      .response-table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+      <!-- Hamburger Only (No Menu Items Yet) -->
+<div class="hamburger-container">
+  <div class="hamburger" onclick="toggleMenu()">☰</div>
+</div>
+
+<!-- Sidebar placeholder for later -->
+<div class="sidebar" id="sidebarMenu">
+ <ul>
+  <li><a href="index.html" onclick="toggleMenu()">📊 Dashboard</a></li>
+  <li><a href="page1.html" onclick="toggleMenu()">📁 Reports</a></li>
+  <li>
+    <a href="https://docs.google.com/spreadsheets/d/1zYSKIqZNEkZXqvXTZJ90WlABxheArCkniGGACAPAGUg/edit?gid=0#gid=0" 
+       target="_blank" 
+       onclick="toggleMenu()">
+      📬 Spreadsheet
+    </a>
+  </li>
+</ul>
+
+</div>
+
+  <h1>📊 i-GOV Feedback Responses Breakdown</h1>
+
+  <div class="controls">
+    <label>Filter by Office:
+      <select id="officeSelect">
+        <option value="">-- All Offices --</option>
+        <option value="BICOL CENTRAL STATION">BICOL CENTRAL STATION</option>
+        <option value="BICOL SCIENCE AND TECHNOLOGY CENTRUM">BICOL SCIENCE AND TECHNOLOGY CENTRUM</option>
+        <option value="CITY ACCOUNTING OFFICE">CITY ACCOUNTING OFFICE</option>
+        <option value="CITY AGRICULTURIST OFFICE">CITY AGRICULTURIST OFFICE</option>
+        <option value="CITY ASSESSORS OFFICE">CITY ASSESSORS OFFICE</option>
+        <option value="CITY BUDGET OFFICE">CITY BUDGET OFFICE</option>
+        <option value="CITY CIVIL REGISTRY OFFICE">CITY CIVIL REGISTRY OFFICE</option>
+        <option value="CITY DISASTER RISK REDUCTION MANAGEMENT OFFICE">CITY DISASTER RISK REDUCTION MANAGEMENT OFFICE</option>
+        <option value="CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE">CITY ENVIRONMENT AND NATURAL RESOURCES OFFICE</option>
+        <option value="CITY ENGINEERS OFFICE">CITY ENGINEERS OFFICE</option>
+        <option value="CITY EVENTS PROTOCOL AND PUBLICATION INFORMATION OFFICE">CITY EVENTS PROTOCOL AND PUBLICATION INFORMATION OFFICE</option>
+        <option value="CITY HEALTH OFFICE">CITY HEALTH OFFICE</option>
+        <option value="CITY HUMAN RESOURCE MANAGEMENT OFFICE">CITY HUMAN RESOURCE MANAGEMENT OFFICE</option>
+        <option value="CITY LEGAL OFFICE">CITY LEGAL OFFICE</option>
+        <option value="CITY MAYORS OFFICE">CITY MAYORS OFFICE</option>
+        <option value="CITY MAYORS OFFICE - OFFICE OF THE SENIOR CITIZENS AFFAIRS">CITY MAYORS OFFICE - OFFICE OF THE SENIOR CITIZENS AFFAIRS</option>
+        <option value="CITY MAYORS OFFICE – RESOURCE CENTER FOR THE BLINDS">CITY MAYORS OFFICE – RESOURCE CENTER FOR THE BLINDS</option>
+        <option value="CITY MAYORS OFFICE - WATER SERVICES DIVISION">CITY MAYORS OFFICE - WATER SERVICES DIVISION</option>
+        <option value="CITY PLANNING AND DEVELOPMENT OFFICE">CITY PLANNING AND DEVELOPMENT OFFICE</option>
+        <option value="CITY POPULATION AND NUTRITION OFFICE">CITY POPULATION AND NUTRITION OFFICE</option>
+        <option value="CITY SOCIAL WELFARE AND DEVELOPMENT OFFICE">CITY SOCIAL WELFARE AND DEVELOPMENT OFFICE</option>
+        <option value="CITY TREASURERS OFFICE">CITY TREASURERS OFFICE</option>
+        <option value="CITY VETERINARY OFFICE">CITY VETERINARY OFFICE</option>
+        <option value="EDUCATION SCHOLARSHIP AND SPORTS OFFICE">EDUCATION SCHOLARSHIP AND SPORTS OFFICE</option>
+        <option value="GENERAL SERVICES OFFICE">GENERAL SERVICES OFFICE</option>
+        <option value="HOUSING AND SETTLEMENT OFFICE">HOUSING AND SETTLEMENT OFFICE</option>
+        <option value="INFORMATION TECHNOLOGY OFFICE">INFORMATION TECHNOLOGY OFFICE</option>
+        <option value="LINGKOD BARANGAY OFFICE">LINGKOD BARANGAY OFFICE</option>
+        <option value="MARKET ENTERPRISE PROMOTIONS OFFICE">MARKET ENTERPRISE PROMOTIONS OFFICE</option>
+        <option value="METRO PUBLIC EMPLOYMENT SERVICE OFFICE">METRO PUBLIC EMPLOYMENT SERVICE OFFICE </option>
+        <option value="NAGA CITY ABATTOIR">NAGA CITY ABATTOIR</option>
+        <option value="NAGA CITY HOSPITAL">NAGA CITY HOSPITAL</option>
+        <option value="NAGA CITY INVESTMENT BOARD">NAGA CITY INVESTMENT BOARD</option>
+        <option value="OFFICE OF THE CITY ADMINISTRATOR – ARTS, CULTURE, AND  TOURISM OFFICE">OFFICE OF THE CITY ADMINISTRATOR – ARTS, CULTURE, AND TOURISM OFFICE</option>
+        <option value="OFFICE OF THE CITY ADMINISTRATOR – BUILDING MAINTENANCE OFFICE ">OFFICE OF THE CITY ADMINISTRATOR</option>
+        <option value="OFFICE OF THE CITY ADMINISTRATOR - CITY PARKS AND RECREATIONAL FACILITIES MANAGEMENT OFFICE">OFFICE OF THE CITY ADMINISTRATOR - CITY PARKS AND RECREATIONAL FACILITIES MANAGEMENT OFFICE</option>
+        <option value="OFFICE OF THE CITY ADMINISTRATOR - I-GOVERNANCE OFFICE">OFFICE OF THE CITY ADMINISTRATOR - I-GOVERNANCE OFFICE</option>
+        <option value="OUR LADY OF LOURDES INFIRMARY">OUR LADY OF LOURDES INFIRMARY</option>
+        <option value="PERSONS WITH DISABILTY AFFAIRS OFFICE ">PERSONS WITH DISABILTY AFFAIRS OFFICE</option>
+        <option value="PUBLIC SAFETY OFFICE">PUBLIC SAFETY OFFICE</option>
+        <option value="RAUL S. ROCO LIBRARY / NAGA CITY PUBLIC LIBRARY">RAUL S. ROCO LIBRARY / NAGA CITY PUBLIC LIBRARY</option>
+        <option value="SANGGUNIANG PANLUNGSOD">SANGGUNIANG PANLUNGSOD</option>
+        <option value="SOLID WASTE MANAGEMENT OFFICE">SOLID WASTE MANAGEMENT OFFICE</option>
+      </select>
+    </label>
+    <button id="applyFilter">Apply Filter</button>
+    <button id="resetFilter">Reset Filter</button>
+  </div>
+
+  <div id="responsesContainer"></div>
+
+  <script>
+    const endpoint = "https://script.google.com/macros/s/AKfycbwfsDeWwibuh9Zb6ylf72IaBIvNSTeCTm7TSfBRCVk2ftO4gOpbkCbW8RKg3xT19lnZ/exec";
+    let dataRaw = [];
+
+    document.getElementById('applyFilter').onclick = renderResponses;
+    document.getElementById('resetFilter').onclick = () => {
+      document.getElementById('officeSelect').value = '';
+      renderResponses();
+    };
+
+    async function loadData() {
+      const resp = await fetch(endpoint);
+      dataRaw = await resp.json();
+      renderResponses();
+    }
+
+    function filterByOffice(data) {
+      const office = document.getElementById('officeSelect').value;
+      if (!office) return data;
+      
+      return data.filter(r => {
+        const recordOffice = (r['OFFICE:'] || '').trim();
+        return recordOffice === office;
+      });
+    }
+
+    function groupResponses(data, questionKey) {
+      const counts = {};
+      data.forEach(r => {
+        const response = r[questionKey] || 'No response';
+        counts[response] = (counts[response] || 0) + 1;
+      });
+      
+      const total = data.length;
+      const entries = Object.entries(counts).map(([response, count]) => ({
+        response,
+        count,
+        percentage: total > 0 ? (count / total * 100).toFixed(1) : 0
+      }));
+      
+      // Sort by count descending
+      entries.sort((a, b) => b.count - a.count);
+      
+      return { entries, total };
+    }
+
+    function createQuestionElement(questionKey, questionText, responses) {
+      const container = document.createElement('div');
+      container.className = 'response-container';
+      
+      const title = document.createElement('div');
+      title.className = 'question-title';
+      title.textContent = questionText;
+      container.appendChild(title);
+      
+      const table = document.createElement('table');
+      table.className = 'response-table';
+      
+      const thead = document.createElement('thead');
+      thead.innerHTML = `
+        <tr>
+          <th>Response</th>
+          <th>Count</th>
+          <th>Percentage</th>
+          <th>Visual</th>
+        </tr>
+      `;
+      table.appendChild(thead);
+      
+      const tbody = document.createElement('tbody');
+      responses.entries.forEach(item => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${item.response}</td>
+          <td>${item.count}</td>
+          <td>${item.percentage}%</td>
+          <td>
+            <div class="percentage-bar">
+              <div class="percentage-fill" style="width: ${item.percentage}%"></div>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      table.appendChild(tbody);
+      container.appendChild(table);
+      
+      const total = document.createElement('div');
+      total.className = 'total-responses';
+      total.textContent = `Total Responses: ${responses.total}`;
+      container.appendChild(total);
+      
+      return container;
+    }
+
+    function renderResponses() {
+      const data = filterByOffice(dataRaw);
+      const container = document.getElementById('responsesContainer');
+      container.innerHTML = '';
+      
+      // Define all questions we want to display
+      const questions = [
+        { key: 'CLIENT TYPE:', text: 'Client Type' },
+        { key: 'SEX:', text: 'Sex' },
+        { key: 'AGE:', text: 'Age' },
+        { key: 'BARANGAY IN NAGA CITY:', text: 'Barangay in Naga City' },
+        { key: 'CC1:', text: 'CC1: Awareness of City Government Programs' },
+        { key: 'CC2:', text: 'CC2: Visibility of City Government Programs' },
+        { key: 'CC3:', text: 'CC3: Helpfulness of City Government Programs' },
+        { key: 'SQD0', text: 'SQD0: Overall Satisfaction' },
+        { key: 'SQD1', text: 'SQD1: Ease of Transaction' },
+        { key: 'SQD2', text: 'SQD2: Quality of Service' },
+        { key: 'SQD3', text: 'SQD3: Time of Transaction' },
+        { key: 'SQD4', text: 'SQD4: Staff Competence' },
+        { key: 'SQD5', text: 'SQD5: Physical Setup' },
+        { key: 'SQD6', text: 'SQD6: Information Provided' },
+        { key: 'SQD7', text: 'SQD7: Courtesy of Staff' },
+        { key: 'SQD8', text: 'SQD8: Overall Experience' },
+        { key: 'SERVICE AVAILED:', text: 'Service Availed' }
+      ];
+      
+      questions.forEach(q => {
+        const responses = groupResponses(data, q.key);
+        if (responses.total > 0) { // Only show if there are responses
+          const element = createQuestionElement(q.key, q.text, responses);
+          container.appendChild(element);
+        }
+      });
+      
+      // Handle suggestions separately
+      const suggestions = data.filter(r => r['SUGGESTIONS/COMMENTS:'] || r['Suggestions']);
+      if (suggestions.length > 0) {
+        const suggestionsContainer = document.createElement('div');
+        suggestionsContainer.className = 'response-container';
+        
+        const title = document.createElement('div');
+        title.className = 'question-title';
+        title.textContent = 'Suggestions/Comments';
+        suggestionsContainer.appendChild(title);
+        
+        const table = document.createElement('table');
+        table.className = 'response-table';
+        
+        const thead = document.createElement('thead');
+        thead.innerHTML = `
+          <tr>
+            <th>Office</th>
+            <th>Date</th>
+            <th>Suggestion/Comment</th>
+          </tr>
+        `;
+        table.appendChild(thead);
+        
+        const tbody = document.createElement('tbody');
+        suggestions.forEach(r => {
+          const row = document.createElement('tr');
+          const date = new Date(r['DATE:']).toLocaleDateString();
+          row.innerHTML = `
+            <td>${r['OFFICE:'] || 'Unknown'}</td>
+            <td>${date}</td>
+            <td>${r['SUGGESTIONS/COMMENTS:'] || r['Suggestions']}</td>
+          `;
+          tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        suggestionsContainer.appendChild(table);
+        
+        const total = document.createElement('div');
+        total.className = 'total-responses';
+        total.textContent = `Total Suggestions/Comments: ${suggestions.length}`;
+        suggestionsContainer.appendChild(total);
+        
+        container.appendChild(suggestionsContainer);
+      }
+    }
+
+    loadData();
+ function toggleMenu() {
+  const sidebar = document.getElementById('sidebarMenu');
+  const overlay = document.getElementById('overlay');
+
+  sidebar.classList.toggle('active');
+  overlay.classList.toggle('active');
+}
+
+ 
+ 
+ </script>
+
+
+
+  
+</body>
+</html>
